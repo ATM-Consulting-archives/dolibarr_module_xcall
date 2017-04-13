@@ -105,6 +105,35 @@ print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="center" width="100">'.$langs->trans("Value").'</td>'."\n";
 print '</tr>';
 
+
+$var=!$var;
+print '<tr '.$bc[$var].'>';
+print '<td>'.$langs->trans('XCALL_URL').'</td>';
+print '<td align="center" width="20">&nbsp;</td>';
+print '<td align="right" width="300">';
+print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">'; // Keep form because ajax_constantonoff return single link with <a> if the js is disabled
+print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+print '<input type="hidden" name="action" value="set_XCALL_URL">';
+print '<input style="width:90%" type="text" name="XCALL_URL" value="'.$conf->global->XCALL_URL.'" placeholder="https://restletrouter.centrex9.fingerprint.fr" />';
+print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
+print '</form>';
+print '</td></tr>';
+
+
+$var=!$var;
+print '<tr '.$bc[$var].'>';
+print '<td>'.$langs->trans('XCALL_URL_WS').'</td>';
+print '<td align="center" width="20">&nbsp;</td>';
+print '<td align="right" width="300">';
+print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">'; // Keep form because ajax_constantonoff return single link with <a> if the js is disabled
+print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+print '<input type="hidden" name="action" value="set_XCALL_URL_WS">';
+print '<input style="width:90%" type="text" name="XCALL_URL_WS" value="'.$conf->global->XCALL_URL_WS.'" placeholder="ws://restletrouter.centrex9.fingerprint.fr" />';
+print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
+print '</form>';
+print '</td></tr>';
+/*
+
 // Example with a yes / no select
 $var=!$var;
 print '<tr '.$bc[$var].'>';
@@ -130,6 +159,7 @@ print '<input type="hidden" name="action" value="set_CONSTNAME">';
 print ajax_constantonoff('CONSTNAME');
 print '</form>';
 print '</td></tr>';
+*/
 
 print '</table>';
 

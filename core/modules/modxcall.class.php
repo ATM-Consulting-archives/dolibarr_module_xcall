@@ -44,6 +44,7 @@ class modxcall extends DolibarrModules
 
         $this->db = $db;
 
+		$this->editor_name = 'ATM-Consulting';
 		// Id for module (must be unique).
 		// Use here a free id (See in Home -> System information -> Dolibarr for list of used modules id).
 		$this->numero = 104042; // 104000 to 104999 for ATM CONSULTING
@@ -52,11 +53,11 @@ class modxcall extends DolibarrModules
 
 		// Family can be 'crm','financial','hr','projects','products','ecm','technic','other'
 		// It is used to group modules in module setup page
-		$this->family = "ATM";
+		$this->family = 'interface';
 		// Module label (no space allowed), used if translation string 'ModuleXXXName' not found (where XXX is value of numeric property 'numero' of module)
 		$this->name = preg_replace('/^mod/i','',get_class($this));
 		// Module description, used if translation string 'ModuleXXXDesc' not found (where XXX is value of numeric property 'numero' of module)
-		$this->description = "Description of module xcall";
+		$this->description = 'Description of module xcall';
 		// Possible values for version are: 'development', 'experimental', 'dolibarr' or version
 		$this->version = '1.0';
 		// Key used in llx_const table to save module status enabled/disabled (where MYMODULE is value of property name of module in uppercase)
@@ -102,8 +103,8 @@ class modxcall extends DolibarrModules
 		$this->requiredby = array();	// List of modules id to disable if this one is disabled
 		$this->conflictwith = array();	// List of modules id this module is in conflict with
 		$this->phpmin = array(5,0);					// Minimum version of PHP required by module
-		$this->need_dolibarr_version = array(3,0);	// Minimum version of Dolibarr required by module
-		$this->langfiles = array("xcall@xcall");
+		$this->need_dolibarr_version = array(4,0);	// Minimum version of Dolibarr required by module
+		$this->langfiles = array('xcall@xcall');
 
 		// Constants
 		// List of particular constants to add when module is enabled (key, 'chaine', value, desc, visible, 'current' or 'allentities', deleteonunactive)
@@ -136,7 +137,9 @@ class modxcall extends DolibarrModules
 		// 'stock'            to add a tab in stock view
 		// 'thirdparty'       to add a tab in third party view
 		// 'user'             to add a tab in user view
-        $this->tabs = array();
+        $this->tabs = array(
+			'user:+xcall_user_conf:XCall_conf:xcall@xcall:$user->rights->xcall->call:/xcall/xcall.php?id=__ID__'
+		);
 
         // Dictionaries
 	    if (! isset($conf->xcall->enabled))
@@ -173,12 +176,12 @@ class modxcall extends DolibarrModules
 
 		// Add here list of permission defined by an id, a label, a boolean and two constant strings.
 		// Example:
-		// $this->rights[$r][0] = $this->numero . $r;	// Permission id (must not be already used)
-		// $this->rights[$r][1] = 'Permision label';	// Permission label
-		// $this->rights[$r][3] = 1; 					// Permission by default for new user (0/1)
-		// $this->rights[$r][4] = 'level1';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
-		// $this->rights[$r][5] = 'level2';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
-		// $r++;
+		$this->rights[$r][0] = $this->numero . $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'xcall_right_call';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'call';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
+		$this->rights[$r][5] = '';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
+		$r++;
 
 
 		// Main menu entries
@@ -246,6 +249,8 @@ class modxcall extends DolibarrModules
 	 */
 	function init($options='')
 	{
+		global $langs;
+		
 		$sql = array();
 		
 		define('INC_FROM_DOLIBARR',true);
@@ -255,6 +260,13 @@ class modxcall extends DolibarrModules
 
 		$result=$this->_load_tables('/xcall/sql/');
 
+		require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
+		$extrafields = new ExtraFields($this->db);
+		
+		
+		$res = $extrafields->addExtraField('xcall_login', $langs->trans('Login'), 'varchar', 10, '150', 'user', 0, 0, '', 0, 0, '', 0, 1);
+		$res = $extrafields->addExtraField('xcall_pwd', $langs->trans('Password'), 'varchar', 10, '150', 'user', 0, 0, '', 0, 0, '', 0, 1);
+		
 		return $this->_init($sql, $options);
 	}
 

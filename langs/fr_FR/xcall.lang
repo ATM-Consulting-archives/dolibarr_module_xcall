@@ -5,3 +5,9 @@ ATMAbout = Ce module a été développé par <a href="http://www.atm-consulting.
 
 xcallSetup = Configuration du module xcall
 xcallAbout = A propos du module xcall
+
+# SETUP
+XCALL_URL=URL du serveur de téléphonie
+
+# USER TAB
+XCall_conf=XCall
