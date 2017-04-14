@@ -125,7 +125,7 @@ if ($id > 0)
 			print '</tr>';
 		}
 
-		print '<tr><td class="titlefield">XCall '.$langs->trans('PostNumber').'</td>';
+		print '<tr><td class="titlefield">'.$form->textwithpicto('XCall '.$langs->trans('PostNumber'), $langs->trans('PostNumberHelp')).'</td>';
 		print '<td width="25%" class="valeur">';
 		print '<input type="text" name="xcall_address_number" value="'.(! empty($object->array_options['options_xcall_address_number'])?$object->array_options['options_xcall_address_number']:'').'" size="92">';
 		print '</td>';

@@ -160,7 +160,7 @@ class XCall
 			$this->callAPI('POST', $this->xcall_url.'/restletrouter/v1/service/Login', false, $header, true);
 			if ($this->last_http_code != 200)
 			{
-				$this->error = 'xcall_login_error_code_'.$this->last_http_code;
+				$this->error = 'xcall_error_code_'.$this->last_http_code;
 				$this->errors[] = $this->error;
 				return false;
 			}
@@ -171,7 +171,6 @@ class XCall
 	
 	public function logout()
 	{
-		// TODO FIXME 405 Method Not Allowed
 		$header = array(
 			'Accept: application/json, text/plain, */*'
 			,'Content-Type: application/json'
@@ -183,16 +182,12 @@ class XCall
 		$this->callAPI('GET', $this->xcall_url.'/restletrouter/v1/service/Logout', false, $header, false);
 		
 		curl_close($this->curl);
-		if ($this->last_http_code != 200)
+		if ($this->last_http_code != 204)
 		{
-			$this->error = 'xcall_logout_error_code_'.$this->last_http_code;
+			$this->error = 'xcall_error_code_'.$this->last_http_code;
 			$this->errors[] = $this->error;
 			return false;
 		}
-		
-		
-		var_dump($this->last_http_code);
-		
 		
 		return true;
 	}
@@ -291,16 +286,33 @@ return 'FIN';
 	 */
 	public function placeCall($destination)
 	{
-		$header = array(
-			'Accept: application/json, text/plain, */*'
-			,'Content-Type: application/json'
-			,'X-Application:'.$this->xapplication
-			,'Cookie: '.$this->cookie
-		);
-		//var_dump($this->TLineContactable);exit;
-		$response = $this->callAPI('POST', $this->xcall_url.'/restletrouter/'.$this->TLineContactable[300]->restUri.'placeCall', array('destination' => $destination), $header);
+		global $user;
 		
+		if (!empty($this->TLineContactable[$user->array_ooptions['options_xcall_address_number']]))
+		{
+			$url = $this->TLineContactable[$user->array_ooptions['options_xcall_address_number']]->restUri.'placeCall';
+			
+			$header = array(
+				'Accept: application/json, text/plain, */*'
+				,'Content-Type: application/json'
+				,'X-Application:'.$this->xapplication
+				,'Cookie: '.$this->cookie
+			);
+			
+			//var_dump($this->TLineContactable);exit;
+			$response = $this->callAPI('POST', $url, array('destination' => $destination), $header);
+			if (!empty($response->exceptionId))
+			{
+				$this->error = $response->exceptionId.'; '.$response->message;
+				$this->errors[] = $this->error;
+				return false;
+			}
 //		var_dump($response); // Si erreur => exceptionId; cause; message
-		return $response;
+			return $response;
+		}
+
+		$this->error = 'xcall_placecall_error_address_number_not_defined';
+		$this->errors[] = $this->error;
+		return false;
 	}
 }
