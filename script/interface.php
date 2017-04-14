@@ -23,18 +23,16 @@ echo 'CallAPI <br />';
 $xcall = new XCall;
 
 // TODO remove
-//$xcall->debug = true;
-
-
-
+$xcall->debug = true;
 
 $xcall->login();
+
 $xcall->getCallLineList();
 
-$xcall->placeCall(301);
+$xcall->startMonitoring();
+//$xcall->placeCall(301);
 
 $xcall->logout();
-curl_close($xcall->curl);
 exit;
 
 

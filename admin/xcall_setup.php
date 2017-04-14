@@ -108,6 +108,34 @@ print '</tr>';
 
 $var=!$var;
 print '<tr '.$bc[$var].'>';
+print '<td>'.$langs->trans('XCALL_DEFAULT_LOGIN').'</td>';
+print '<td align="center" width="20">&nbsp;</td>';
+print '<td align="right" width="300">';
+print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">'; // Keep form because ajax_constantonoff return single link with <a> if the js is disabled
+print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+print '<input type="hidden" name="action" value="set_XCALL_DEFAULT_LOGIN">';
+print '<input size="15" type="text" name="XCALL_DEFAULT_LOGIN" value="'.$conf->global->XCALL_DEFAULT_LOGIN.'" />';
+print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
+print '</form>';
+print '</td></tr>';
+
+$var=!$var;
+print '<tr '.$bc[$var].'>';
+print '<td>'.$langs->trans('XCALL_DEFAULT_PWD').'</td>';
+print '<td align="center" width="20">&nbsp;</td>';
+print '<td align="right" width="300">';
+print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">'; // Keep form because ajax_constantonoff return single link with <a> if the js is disabled
+print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+print '<input type="hidden" name="action" value="set_XCALL_DEFAULT_PWD">';
+print '<input size="15" type="password" name="XCALL_DEFAULT_PWD" value="'.$conf->global->XCALL_DEFAULT_PWD.'" />';
+print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
+print '</form>';
+print '</td></tr>';
+
+
+
+$var=!$var;
+print '<tr '.$bc[$var].'>';
 print '<td>'.$langs->trans('XCALL_URL').'</td>';
 print '<td align="center" width="20">&nbsp;</td>';
 print '<td align="right" width="300">';
@@ -118,7 +146,6 @@ print '<input style="width:90%" type="text" name="XCALL_URL" value="'.$conf->glo
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print '</form>';
 print '</td></tr>';
-
 
 $var=!$var;
 print '<tr '.$bc[$var].'>';

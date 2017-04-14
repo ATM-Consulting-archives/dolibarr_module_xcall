@@ -24,6 +24,7 @@
 
 require './config.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/usergroups.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 
 $langs->load("users");
 $langs->load("admin");
@@ -38,6 +39,12 @@ if ($user->societe_id > 0) $socid = $user->societe_id;
 
 if (empty($user->rights->xcall->call)) accessforbidden();
 
+if ($id > 0)
+{
+	$object = new User($db);
+	$object->fetch($id);
+}
+		
 // Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
 $hookmanager->initHooks(array('usercard','globalcard'));
 
@@ -49,19 +56,23 @@ $parameters=array('id'=>$socid);
 $reshook=$hookmanager->executeHooks('doActions',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
 if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 
-if (empty($reshook)) {
-    if ($action == 'update' && !GETPOST('cancel')) {
-        $edituser = new User($db);
-        $edituser->fetch($id);
-
-		// TODO FIXME est-ce que ce login/mdp doit être configuré depuis une fiche utilisateur ? Est-ce pas un login/mdp générique à tous ?
-        $edituser->array_options['options_xcall_login'] = GETPOST('xcall_login');
-        $edituser->array_options['options_xcall_pwd'] = GETPOST('xcall_pwd');
-
-        $result=$edituser->insertExtraFields();
+if (empty($reshook))
+{
+    if ($action == 'update' && !GETPOST('cancel'))
+	{
+		if ($user->admin)
+		{
+			// TODO FIXME est-ce que ce login/mdp doit être configuré depuis une fiche utilisateur ? Est-ce pas un login/mdp générique à tous ?
+			$object->array_options['options_xcall_login'] = GETPOST('xcall_login');
+			$object->array_options['options_xcall_pwd'] = GETPOST('xcall_pwd');
+		}
+		
+		$object->array_options['options_xcall_address_number'] = GETPOST('xcall_address_number');
+		
+        $result=$object->insertExtraFields();
         if ($result < 0) 
         {
-            setEventMessages($edituser->error, $edituser->errors, 'errors');
+            setEventMessages($object->error, $object->errors, 'errors');
         }
     }
 }
@@ -77,9 +88,6 @@ llxHeader('','XCall_conf');
 
 if ($id > 0)
 {
-    $object = new User($db);
-    $object->fetch($id);
-
 	$head = user_prepare_head($object);
 
 	$title = $langs->trans('User');
@@ -102,17 +110,26 @@ if ($id > 0)
     {
 		print '<table class="border" width="100%">';
         
-		print '<tr><td class="titlefield">XCall '.$langs->trans('Login').'</td>';
-		print '<td width="25%" class="valeur">';
-		print '<input type="text" name="xcall_login" value="'.(! empty($object->array_options['options_xcall_login'])?$object->array_options['options_xcall_login']:'').'" size="92">';
-		print '</td>';
-		print '</tr>';
-        
-		print '<tr><td class="titlefield">XCall '.$langs->trans('Password').'</td>';
-		print '<td class="valeur">';
-		print '<input type="password" name="xcall_pwd" value="'.(! empty($object->array_options['options_xcall_pwd'])?$object->array_options['options_xcall_pwd']:'').'" size="92">';
-		print '</td>';
-		print '</tr>';
+		if ($user->admin)
+		{
+			print '<tr><td class="titlefield">XCall '.$langs->trans('Login').'</td>';
+			print '<td width="25%" class="valeur">';
+			print '<input type="text" name="xcall_login" value="'.(! empty($object->array_options['options_xcall_login'])?$object->array_options['options_xcall_login']:'').'" size="92">';
+			print '</td>';
+			print '</tr>';
+
+			print '<tr><td class="titlefield">XCall '.$langs->trans('Password').'</td>';
+			print '<td class="valeur">';
+			print '<input type="password" name="xcall_pwd" value="'.(! empty($object->array_options['options_xcall_pwd'])?$object->array_options['options_xcall_pwd']:'').'" size="92">';
+			print '</td>';
+			print '</tr>';
+
+			print '<tr><td class="titlefield">XCall '.$langs->trans('PostNumber').'</td>';
+			print '<td class="valeur">';
+			print '<input type="text" name="xcall_address_number" value="'.(! empty($object->array_options['options_xcall_address_number'])?$object->array_options['options_xcall_address_number']:'').'" size="92">';
+			print '</td>';
+			print '</tr>';
+		}
 
         print '</table>';
     }
@@ -120,14 +137,23 @@ if ($id > 0)
     {
         print '<table class="border" width="100%">';
 
-        print '<tr><td width="25%">XCall '.$langs->trans('Login').'</td>';
-        print '<td class="valeur">'.(! empty($object->array_options['options_xcall_login'])?$object->array_options['options_xcall_login']:'').'</td>';
-        print '</tr>';
-        
-        print '<tr><td>XCall '.$langs->trans('Password').'</td>';
-        print '<td class="valeur">'.preg_replace('/./','*',(! empty($object->array_options['options_xcall_pwd'])?$object->array_options['options_xcall_pwd']:'')).'</a></td>';
-        print "</tr>\n";
-        
+		if ($user->admin)
+		{
+			print '<tr><td width="25%">XCall '.$langs->trans('Login').'</td>';
+			print '<td class="valeur">'.(! empty($object->array_options['options_xcall_login'])?$object->array_options['options_xcall_login']:'').'</td>';
+			print '</tr>';
+
+			print '<tr id="phh"><td>XCall '.$langs->trans('Password').'</td>';
+			print '<td class="valeur">'.preg_replace('/./','*',(! empty($object->array_options['options_xcall_pwd'])?$object->array_options['options_xcall_pwd']:'')).'</a></td>';
+			print "</tr>\n";
+		}
+		
+		
+		print '<tr><td width="25%">'.$form->textwithpicto('XCall '.$langs->trans('PostNumber'), $langs->trans('PostNumberHelp')).'</td>';
+		print '<td class="valeur">'.(! empty($object->array_options['options_xcall_address_number'])?$object->array_options['options_xcall_address_number']:'').'</td>';
+		print '</tr>';
+		
+		
         print "</table>\n";
     }
 

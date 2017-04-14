@@ -264,8 +264,9 @@ class modxcall extends DolibarrModules
 		$extrafields = new ExtraFields($this->db);
 		
 		
-		$res = $extrafields->addExtraField('xcall_login', $langs->trans('Login'), 'varchar', 10, '150', 'user', 0, 0, '', 0, 0, '', 0, 1);
-		$res = $extrafields->addExtraField('xcall_pwd', $langs->trans('Password'), 'varchar', 10, '150', 'user', 0, 0, '', 0, 0, '', 0, 1);
+		$res = $extrafields->addExtraField('xcall_login', 'XCall '.$langs->trans('Login'), 'varchar', 100, '150', 'user', 0, 0, '', 0, 0, '', 0, 1);
+		$res = $extrafields->addExtraField('xcall_pwd', 'XCall '.$langs->trans('Password'), 'varchar', 101, '150', 'user', 0, 0, '', 0, 0, '', 0, 1);
+		$res = $extrafields->addExtraField('xcall_address_number', 'XCall '.$langs->trans('PostNumber'), 'int', 102, 10, 'user', 0, 0, '', 0, 0, '', 0, 1);
 		
 		return $this->_init($sql, $options);
 	}
