@@ -64,7 +64,7 @@ class XCall
 	 */
 	private function callAPI($method, $url, $data = false, $header = array(), $useAuth = false)
 	{
-		global $user;
+		global $user,$conf;
 		
 		if ($this->debug) echo '<h5>NEW CALL -> ['.$method.'] '.$url.'</h5>';
 		if ($this->debug) var_dump($data);
@@ -106,8 +106,10 @@ class XCall
 			if (empty($user->array_options)) $user->fetch_optionals();
 			if (!empty($user->array_options['options_xcall_login']) && !empty($user->array_options['options_xcall_pwd']))
 			{
+				$login = !empty($user->array_options['options_xcall_login']) ? $user->array_options['options_xcall_login'] : $conf->global->XCALL_DEFAULT_LOGIN;
+				$pwd = !empty($user->array_options['options_xcall_pwd']) ? $user->array_options['options_xcall_pwd'] : $conf->global->XCALL_DEFAULT_PWD;
 				curl_setopt($this->curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-				curl_setopt($this->curl, CURLOPT_USERPWD, $user->array_options['options_xcall_login'].':'.$user->array_options['options_xcall_pwd']);
+				curl_setopt($this->curl, CURLOPT_USERPWD, $login.':'.$pwd);
 			}
 		}
 
