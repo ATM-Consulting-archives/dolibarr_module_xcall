@@ -119,18 +119,18 @@ if ($id > 0)
 			print '</tr>';
 
 			print '<tr><td class="titlefield">XCall '.$langs->trans('Password').'</td>';
-			print '<td class="valeur">';
+			print '<td width="25%" class="valeur">';
 			print '<input type="password" name="xcall_pwd" value="'.(! empty($object->array_options['options_xcall_pwd'])?$object->array_options['options_xcall_pwd']:'').'" size="92">';
-			print '</td>';
-			print '</tr>';
-
-			print '<tr><td class="titlefield">XCall '.$langs->trans('PostNumber').'</td>';
-			print '<td class="valeur">';
-			print '<input type="text" name="xcall_address_number" value="'.(! empty($object->array_options['options_xcall_address_number'])?$object->array_options['options_xcall_address_number']:'').'" size="92">';
 			print '</td>';
 			print '</tr>';
 		}
 
+		print '<tr><td class="titlefield">XCall '.$langs->trans('PostNumber').'</td>';
+		print '<td width="25%" class="valeur">';
+		print '<input type="text" name="xcall_address_number" value="'.(! empty($object->array_options['options_xcall_address_number'])?$object->array_options['options_xcall_address_number']:'').'" size="92">';
+		print '</td>';
+		print '</tr>';
+			
         print '</table>';
     }
     else	// View mode
@@ -148,11 +148,9 @@ if ($id > 0)
 			print "</tr>\n";
 		}
 		
-		
 		print '<tr><td width="25%">'.$form->textwithpicto('XCall '.$langs->trans('PostNumber'), $langs->trans('PostNumberHelp')).'</td>';
 		print '<td class="valeur">'.(! empty($object->array_options['options_xcall_address_number'])?$object->array_options['options_xcall_address_number']:'').'</td>';
 		print '</tr>';
-		
 		
         print "</table>\n";
     }
