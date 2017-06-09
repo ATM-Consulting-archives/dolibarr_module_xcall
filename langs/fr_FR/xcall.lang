@@ -24,3 +24,6 @@ xcall_error_code_405=Erreur : code 405, méthode non autorisée
 
 # ERROR
 xcall_placecall_error_address_number_not_defined=Erreur : Numéro de poste non renseigné sur votre fiche utilisateur ou introuvable dans la liste des appareils
+
+# FRONT
+xcall_placeCall=Appeler le :

@@ -4,10 +4,10 @@ class XCall
 {
 	public $debug = false;
 	
-	private $xcall_url = 'https://restletrouter.centrex9.fingerprint.fr';
-	private $xcall_url_ws = 'wss://restletrouter.centrex9.fingerprint.fr';
-//	private $xcall_url_ws = 'ws://restletrouter.centrex9.fingerprint.fr';
-//	private $xcall_url_ws = 'wss://myistra.centrex9.fingerprint.fr'; // Vu sur l'interface web de test
+//	private $xcall_url = 'https://restletrouter.centrex9.fingerprint.fr';
+	private $xcall_url = 'https://myistra.centrex9.fingerprint.fr';
+//	private $xcall_url_ws = 'wss://restletrouter.centrex9.fingerprint.fr';
+	private $xcall_url_ws = 'wss://myistra.centrex9.fingerprint.fr'; // Vu sur l'interface web de test
 	
 	private $cookie = null;
 	private $xapplication = null;
@@ -19,7 +19,7 @@ class XCall
 	 * Tableau contenant toutes les lignes joignables
 	 * @var array 
 	 */
-	private $TLineContactable = array();
+	public $TLineContactable = array();
 	
 	public function __construct()
 	{
@@ -27,7 +27,6 @@ class XCall
 		
 		if (!empty($conf->global->XCALL_URL)) $this->xcall_url = $conf->global->XCALL_URL;
 		if (!empty($conf->global->XCALL_URL_WS)) $this->xcall_url_ws = $conf->global->XCALL_URL_WS;
-		
 		
 		// TODO FIXME besoin d'une persistance ?
 		if (!empty($_SESSION['dolibarr_xcall_myRCC_SESSIONID'])) $this->cookie = $_SESSION['dolibarr_xcall_myRCC_SESSIONID'];
@@ -62,12 +61,12 @@ class XCall
 	 * @param array		$data	array("param" => "value") ==> index.php?param=value
 	 * @return call result
 	 */
-	private function callAPI($method, $url, $data = false, $header = array(), $useAuth = false)
+	private function callAPI($method, $url, $data = false, $header = array(), $useAuth = false, $ph=false)
 	{
 		global $user,$conf;
 		
 		if ($this->debug) echo '<h5>NEW CALL -> ['.$method.'] '.$url.'</h5>';
-		if ($this->debug) var_dump($data);
+		if ($this->debug) { echo '<b>$data =></b>'; var_dump($data); }
 		
 		curl_reset($this->curl);
 		curl_setopt($this->curl, CURLOPT_HEADER, true);
@@ -87,14 +86,14 @@ class XCall
 				if ($data) $url = sprintf("%s?%s", $url, http_build_query($data));
 		}
 
-		if ($this->debug) var_dump(__METHOD__.' $url = '.$url);
+		if ($this->debug) { echo '<b>'.__METHOD__.' URL used =</b> '.$url; }
 
 		curl_setopt($this->curl, CURLOPT_URL, $url);
 		curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, 1);
 		
 		if (!empty($header))
 		{
-			if ($this->debug) var_dump($header);
+			if ($this->debug) { echo '<br /><br /><b>HEADER =></b>'; var_dump($header); }
 			curl_setopt($this->curl, CURLOPT_HTTPHEADER, $header);
 		}
 		
@@ -104,13 +103,11 @@ class XCall
 		if ($useAuth)
 		{
 			if (empty($user->array_options)) $user->fetch_optionals();
-			if (!empty($user->array_options['options_xcall_login']) && !empty($user->array_options['options_xcall_pwd']))
-			{
-				$login = !empty($user->array_options['options_xcall_login']) ? $user->array_options['options_xcall_login'] : $conf->global->XCALL_DEFAULT_LOGIN;
-				$pwd = !empty($user->array_options['options_xcall_pwd']) ? $user->array_options['options_xcall_pwd'] : $conf->global->XCALL_DEFAULT_PWD;
-				curl_setopt($this->curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-				curl_setopt($this->curl, CURLOPT_USERPWD, $login.':'.$pwd);
-			}
+			
+			$login = !empty($user->array_options['options_xcall_login']) ? $user->array_options['options_xcall_login'] : $conf->global->XCALL_DEFAULT_LOGIN;
+			$pwd = !empty($user->array_options['options_xcall_pwd']) ? $user->array_options['options_xcall_pwd'] : $conf->global->XCALL_DEFAULT_PWD;
+			curl_setopt($this->curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+			curl_setopt($this->curl, CURLOPT_USERPWD, $login.':'.$pwd);
 		}
 
 		$result = curl_exec($this->curl);
@@ -137,8 +134,12 @@ class XCall
 			if (!empty($matches[1])) $this->setXApplication($matches[1]);
 		}
 		
-		if ($this->debug) var_dump($result);
-		
+		if ($this->debug) { echo '<b>Resultat brut =></b>'; var_dump($result); }
+		if ($ph) {
+			echo '-----------------------';
+			var_dump($header_info, $response);
+			echo '-----------------------';
+		}
 		return json_decode($response);
 	}
 	
@@ -160,6 +161,7 @@ class XCall
 			);
 			
 			$this->callAPI('POST', $this->xcall_url.'/restletrouter/v1/service/Login', false, $header, true);
+			
 			if ($this->last_http_code != 200)
 			{
 				$this->error = 'xcall_error_code_'.$this->last_http_code;
@@ -222,77 +224,113 @@ class XCall
 				$this->TLineContactable[$item->addressNumber] = $item;
 			}
 		}
-		
+//		var_dump($this->TLineContactable);
 		return $response;
 	}
 	
 	
-	
+	/**
+	 * 1. Upgrade de la connexion pour modifier le mode
+	 * 2. Lance le mode écoute
+	 * 3. Check si des actions sont en cours
+	 */
 	public function startMonitoring()
 	{
 		$header = array(
-			'Connection: Upgrade'
+			'Upgrade: WebSocket'
+			,'Connection: Upgrade'
 			,'Cookie: '.$this->cookie
 		);
 		
-//		$r = $this->callAPI('GET', $this->xcall_url_ws.'/restletrouter/ws-service/myRCC', false, $header, false);
-		$r = $this->callAPI('GET', 'wss://myistra.centrex9.fingerprint.fr/restletrouter/ws-service/myRCC', false, $header, false);
-		var_dump($r);
-		if (empty($r)) exit('WS DOWN');
-//		$r = $this->callAPI('GET', $this->xcall_url_ws.'/restletrouter/ws-service/myRCC', false, $header, false);
+		$r = $this->callAPI('GET', $this->xcall_url_ws.'/restletrouter/ws-service/myRCC', false, $header, false);
+//		$r = $this->callAPI('GET', 'https://myistra.centrex9.fingerprint.fr/restletrouter/ws-service/myRCC', false, $header, false, true);
+//		$r = $this->callAPI('GET', 'wss://myistra.centrex9.fingerprint.fr/restletrouter/ws-service/myRCC', false, $header, false, true);
+//		$r = $this->callAPI('GET', 'wss://restletrouter.centrex9.fingerprint.fr/restletrouter/ws-service/myRCC', false, $header, false, true);	
+//		$r = $this->callAPI('GET', 'wss://istra1/restletrouter/ws-service/myRCC', false, $header, false, true);	
+		
+		if ($this->last_http_code != 101)
+		{
+			var_dump('WS DOWN last_http_code = '.$this->last_http_code);
+			return false;
+		}
+		
+		return true;
+	}
+	
+	public function startListener() {
+		
+		$header = array(
+			'Accept: */*'
+			,'Content-Type: application/json'
+			,'X-Application:'.$this->xapplication
+			,'Cookie: '.$this->cookie
+		);
+		
+		/* Ecoute */
+		$r = $this->callAPI('POST', $this->xcall_url.'/restletrouter/v1/service/EventListener/bean', array('name' => 'myRCCListener'), $header, false);
+		// resultat: {"name":"myRCCListener","restUri":"v1/service/EventListener/bean/myRCCListener"}
 
-//		if ($this->last_http_code != 101)
-//		{
-//			
-//		}
+		if ($this->last_http_code != 200)
+		{
+			var_dump('BEAN myRCCListener DOWN last_http_code = '.$this->last_http_code, $r);
+//			return false;
+		}
+	
 		
 		
-// TODO remove		
-return 'FIN';
+		$header = array(
+			'Accept: application/json, text/plain, */*'
+			,'X-Application:'.$this->xapplication
+			,'Cookie: '.$this->cookie
+		);
 		
+		/* Actions en cours ? */
+		$r2 = $this->callAPI('GET', $this->xcall_url.'/restletrouter/v1/rcc/CallLine', array('listenerName' => 'myRCCListener'), $header, false);
+		
+		if ($this->last_http_code != 200)
+		{
+			var_dump('CallLine DOWN last_http_code = '.$this->last_http_code, $r2);
+			return false;
+		}
+		// do stuff
+		
+		return true;
+	}
+	
+	public function stopMonitoring()
+	{
 		$header = array(
 			'Accept: application/json, text/plain, */*'
 			,'Content-Type: application/json'
 			,'X-Application:'.$this->xapplication
 			,'Cookie: '.$this->cookie
 		);
-		//{"name":"myRCCListener","restUri":"v1/service/EventListener/bean/myRCCListener"}
-		$r2 = $this->callAPI('POST', $this->xcall_url.'/restletrouter/v1/service/EventListener/bean', array('name' => 'CallLines'), $header, false);
-//		var_dump($r2);
-//		if ($this->last_http_code != 200)
-//		{
-//			
-//		}
 		
+		$r = $this->callAPI('DELETE', $this->xcall_url.'/restletrouter/v1/service/EventListener/bean/CallLines', array('listenerName' => 'myRCCListener'), $header, false);
 		
-		$header = array(
-			'Accept: application/json, text/plain, */*'
-			,'X-Application:'.$this->xapplication
-			,'Cookie: '.$this->cookie
-		);
-		$r3 = $this->callAPI('GET', $this->xcall_url.'/restletrouter/v1/rcc/CallLine', array('listenerName' => 'CallLines'), $header, false);
-//		var_dump($r3);
-//		if ($this->last_http_code != 200)
-//		{
-//			
-//		}
+		if ($this->last_http_code != 200)
+		{
+			var_dump('CallLines myRCCListener DOWN last_http_code = '.$this->last_http_code, $r);
+			return false;
+		}
 		
-		return 'FIN';
+		return true;
 	}
 	
 	/**
 	 * Passer un appel d'un poste vers un autre
 	 * 
-	 * @param int $destination
+	 * @param string $destination	numéro court d'un autre poste téléphonique ou un format standard (0623000000 || +33623000000 || 06 23 00 00 00)
 	 * @return array
 	 */
 	public function placeCall($destination)
 	{
 		global $user;
 		
-		if (!empty($this->TLineContactable[$user->array_ooptions['options_xcall_address_number']]))
+		if (!empty($this->TLineContactable[$user->array_options['options_xcall_address_number']]))
 		{
-			$url = $this->TLineContactable[$user->array_ooptions['options_xcall_address_number']]->restUri.'placeCall';
+			$url = $this->xcall_url.'/restletrouter/';
+			$url .= $this->TLineContactable[$user->array_options['options_xcall_address_number']]->restUri.'/placeCall';
 			
 			$header = array(
 				'Accept: application/json, text/plain, */*'
