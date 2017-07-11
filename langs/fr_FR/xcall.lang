@@ -10,6 +10,7 @@ xcallAbout = A propos du module xcall
 XCALL_DEFAULT_LOGIN=Login par défault
 XCALL_DEFAULT_PWD=Mot de passe par défaut
 XCALL_URL=URL du serveur de téléphonie
+XCALL_DEBUG=Activer le mode debug
 
 # USER TAB
 XCall_conf=XCall
@@ -18,12 +19,11 @@ Password=Mot de passe
 PostNumber=Numéro de poste
 PostNumberHelp=Il s'agit du numéro court attitré au poste<br/>Cette information est fournie à l'affectation de l'appareil ou disponible dans le corporate directory
 
-# ERROR CODE
-xcall_error_code_401=Erreur : code 401, connexion non authorisée (vérifier le couple login/mot de passe du module XCall)
-xcall_error_code_405=Erreur : code 405, méthode non autorisée
-
 # ERROR
 xcall_placecall_error_address_number_not_defined=Erreur : Numéro de poste non renseigné sur votre fiche utilisateur ou introuvable dans la liste des appareils
 
 # FRONT
+xcallPanel=Panel XCall
 xcall_placeCall=Appeler le :
+PlaceCall=Appeler
+xcallSendAction=Lancer

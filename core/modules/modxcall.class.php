@@ -89,7 +89,19 @@ class modxcall extends DolibarrModules
 		//							'workflow' => array('WORKFLOW_MODULE1_YOURACTIONTYPE_MODULE2'=>array('enabled'=>'! empty($conf->module1->enabled) && ! empty($conf->module2->enabled)', 'picto'=>'yourpicto@xcall')) // Set here all workflow context managed by module
 		//                        );
 		$this->module_parts = array(
-			'js' => array('/xcall/js/xcall.js.php')
+			'js' => array(
+				'/xcall/js/xcall.js.php'
+				,'/xcall/js/cometd.js'
+				,'/xcall/js/AckExtension.js'
+				,'/xcall/js/ReloadExtension.js'
+				,'/xcall/js/jquery.cookie.js'
+				,'/xcall/js/jquery.cometd.js'
+				,'/xcall/js/jquery.cometd-reload.js'
+				,'/xcall/js/humanmsg-1.0-centilePatch.js'
+				,'/xcall/js/myrcc.js'
+			)
+			,'css' => array('/xcall/css/xcall.css')
+			,'hooks' => array('leftblock')
 		);
 
 		// Data directories to create when module is enabled.
