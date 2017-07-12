@@ -5,35 +5,38 @@ $langs->load('xcall@xcall');
 
 ?>
 
+var xcall_postnumber = <?php echo (int) $user->array_options['options_xcall_address_number']; ?>;
+
 $(function() {
-	
-	var TNodeValue = new Array;
-	var xcall_regex_a = new RegExp('^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$', 'im');
-	var numbers = new PhoneNumberParser();
-	
-	xcallReadDOM(document.getElementById('id-right'));
-	
-	// Récupération de tous les noeuds texte
-	function xcallReadDOM(current_dom)
+	if (xcall_postnumber > 0)
 	{
-		for (var xcall_i in current_dom.childNodes)
+		var TNodeValue = new Array;
+		var xcall_regex_a = new RegExp('^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$', 'im');
+		var numbers = new PhoneNumberParser();
+
+		xcallReadDOM(document.getElementById('id-right'));
+
+		// Récupération de tous les noeuds texte
+		function xcallReadDOM(current_dom)
 		{
-			if (current_dom.childNodes[xcall_i].nodeType == Node.TEXT_NODE) // Node.TEXT_NODE
+			for (var xcall_i in current_dom.childNodes)
 			{
-				var val = current_dom.childNodes[xcall_i].nodeValue.replace(/\s+/g, '');
-				if (val.length >= 10 && xcall_regex_a.test(val) === true) TNodeValue.push({phone: val, node: current_dom.childNodes[xcall_i]});
-			}
-			else if (current_dom.childNodes[xcall_i].nodeType == Node.ELEMENT_NODE)
-			{
-				xcallReadDOM(current_dom.childNodes[xcall_i]);
+				if (current_dom.childNodes[xcall_i].nodeType == Node.TEXT_NODE) // Node.TEXT_NODE
+				{
+					var val = current_dom.childNodes[xcall_i].nodeValue.replace(/\s+/g, '');
+					if (val.length >= 10 && xcall_regex_a.test(val) === true) TNodeValue.push({phone: val, node: current_dom.childNodes[xcall_i]});
+				}
+				else if (current_dom.childNodes[xcall_i].nodeType == Node.ELEMENT_NODE)
+				{
+					xcallReadDOM(current_dom.childNodes[xcall_i]);
+				}
 			}
 		}
+
+		numbers.parse(TNodeValue);
+
+		for (var xcall_i in numbers.items) numbers.placeCall(xcall_i);
 	}
-
-	numbers.parse(TNodeValue);
-
-	for (var xcall_i in numbers.items) numbers.placeCall(xcall_i);
-	
 });
 
 
@@ -117,8 +120,6 @@ var PhoneNumberParser = function() {
     }
 };
 
-
-var xcall_postnumber = <?php echo (int) $user->array_options['options_xcall_address_number']; ?>;
 var xcall_login = '<?php echo !empty($user->array_options['xcall_login']) ? $user->array_options['xcall_login'] : $conf->global->XCALL_DEFAULT_LOGIN; ?>';
 var xcall_password = '<?php echo !empty($user->array_options['xcall_pwd']) ? $user->array_options['xcall_pwd'] : $conf->global->XCALL_DEFAULT_PWD; ?>';
 var xcall_id;
