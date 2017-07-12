@@ -89,49 +89,52 @@ class Actionsxcall
 	
 	function printLeftBlock($parameters, &$object, &$action, $hookmanager)
 	{
-		global $langs,$conf;
+		global $langs,$conf,$user;
 		
-		$langs->load('xcall@xcall');
+		if (!empty($user->array_options['options_xcall_address_number']))
+		{
+			$langs->load('xcall@xcall');
 		
-		// TODO Factoriser
-		$hookmanager->resPrint = '<hr />
-			<div id="xcall_panel" class=" vmenu">
-				<div align="center" class="titre">'.$langs->trans('xcallPanel').'</div>
-				
-				<!-- TODO remove and force the ID with $user->array_options["options_xcall_address_number"] -->
-				'.(!empty($conf->global->XCALL_DEBUG) ? '<select id="placeCallExtensionID" autocomplete="OFF"></select>' : '' ).'
-				<form action="#" onsubmit="xcallPlaceCall();return false;">
-					<!-- TODO use $form->textwithpicto()  -->
-					<label class="fieldrequired" for="placeCallDestination">'.$langs->trans('xcall_placeCall').'</label>
-                    <input id="placeCallDestination" value="" autocomplete="OFF" type="text">
-                    <div align="center"><input class="button" value="'.$langs->trans('PlaceCall').'" type="submit"></div>
-                </form>
-				<br />
-				<form action="#" onsubmit="sendAction(this);return false;">
-                    <input id="xcall_lineId" value="" autocomplete="OFF" type="text">
-					<div align="center">
-						<select id="xcall_action" autocomplete="OFF" onchange="doOnActionChange();">
-							<option>addParty</option>
-							<option>answer</option>
-							<option selected="selected">disconnect</option>
-							<option>hold</option>
-							<option>unhold</option>
-							<option>leave</option>
-							<option>merge</option>
-							<option>redirect</option>
-							<option>sendDtmfs</option>
-							<option>transfer</option>
-						</select>
-						<span id="xcall_actionValueLabel"></span>
-					
-						<input id="xcall_actionValue" value="" autocomplete="OFF" style="display:none" type="text">
-						<input class="button" value="'.$langs->trans('xcallSendAction').'" type="submit">
-					</div>
-                </form>
-				
-				<div id="messageBox" class="'.(!empty($conf->global->XCALL_DEBUG) ? '' : 'hidden').'"></div>
-			</div>
-		';
+			// TODO Factoriser
+			$hookmanager->resPrint = '<hr />
+				<div id="xcall_panel" class=" vmenu">
+					<div align="center" class="titre">'.$langs->trans('xcallPanel').'</div>
+
+					<!-- TODO remove and force the ID with $user->array_options["options_xcall_address_number"] -->
+					'.(!empty($conf->global->XCALL_DEBUG) ? '<select id="placeCallExtensionID" autocomplete="OFF"></select>' : '' ).'
+					<form action="#" onsubmit="xcallPlaceCall();return false;">
+						<!-- TODO use $form->textwithpicto()  -->
+						<label class="fieldrequired" for="placeCallDestination">'.$langs->trans('xcall_placeCall').'</label>
+						<input id="placeCallDestination" value="" autocomplete="OFF" type="text">
+						<div align="center"><input class="button" value="'.$langs->trans('PlaceCall').'" type="submit"></div>
+					</form>
+					<br />
+					<form action="#" onsubmit="sendAction(this);return false;">
+						<input id="xcall_lineId" value="" autocomplete="OFF" type="text">
+						<div align="center">
+							<select id="xcall_action" autocomplete="OFF" onchange="doOnActionChange();">
+								<option>addParty</option>
+								<option>answer</option>
+								<option selected="selected">disconnect</option>
+								<option>hold</option>
+								<option>unhold</option>
+								<option>leave</option>
+								<option>merge</option>
+								<option>redirect</option>
+								<option>sendDtmfs</option>
+								<option>transfer</option>
+							</select>
+							<span id="xcall_actionValueLabel"></span>
+
+							<input id="xcall_actionValue" value="" autocomplete="OFF" style="display:none" type="text">
+							<input class="button" value="'.$langs->trans('xcallSendAction').'" type="submit">
+						</div>
+					</form>
+
+					<div id="messageBox" class="'.(!empty($conf->global->XCALL_DEBUG) ? '' : 'hidden').'"></div>
+				</div>
+			';
+		}
 		
 	}
 }
