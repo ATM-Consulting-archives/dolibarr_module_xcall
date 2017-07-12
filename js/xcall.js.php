@@ -4,7 +4,7 @@ require '../config.php';
 $langs->load('xcall@xcall');
 
 ?>
-console.log('<?php echo json_encode($conf->global->XCALL_DEBUG); ?>');
+
 $(function() {
 	
 	var TNodeValue = new Array;
@@ -118,7 +118,7 @@ var PhoneNumberParser = function() {
 };
 
 
-
+var xcall_postnumber = <?php echo (int) $user->array_options['options_xcall_address_number']; ?>;
 var xcall_login = '<?php echo !empty($user->array_options['xcall_login']) ? $user->array_options['xcall_login'] : $conf->global->XCALL_DEFAULT_LOGIN; ?>';
 var xcall_password = '<?php echo !empty($user->array_options['xcall_pwd']) ? $user->array_options['xcall_pwd'] : $conf->global->XCALL_DEFAULT_PWD; ?>';
 var xcall_id;
@@ -127,24 +127,28 @@ var WEB_APPLICATION_NAME = 'myRCC';
 var isReady;
 
 $(document).ready(function() {
-    sendData('v1/service/Login', 'POST', function(datas, type, response) {
-        if (type == 'success' && response && response.getResponseHeader) {
-            authorization = void(0);
-            WEB_APPLICATION_NAME = response.getResponseHeader('X-Application');
-            displayMessage('>>> init websocket');
-            var oldOnMessage = server.onMessage;
-            server.onMessage = function(msg) {
-                if (oldOnMessage) {
-                    oldOnMessage(msg);
-                }
-                if (!isReady) {
-                    isReady = true;
-                    ready();
-                }
-            }
-            server.connect();
-        }
-    });
+
+	if (xcall_postnumber > 0)
+	{
+		sendData('v1/service/Login', 'POST', function(datas, type, response) {
+			if (type == 'success' && response && response.getResponseHeader) {
+				authorization = void(0);
+				WEB_APPLICATION_NAME = response.getResponseHeader('X-Application');
+				displayMessage('>>> init websocket');
+				var oldOnMessage = server.onMessage;
+				server.onMessage = function(msg) {
+					if (oldOnMessage) {
+						oldOnMessage(msg);
+					}
+					if (!isReady) {
+						isReady = true;
+						ready();
+					}
+				}
+				server.connect();
+			}
+		});
+	}
 });
 
 function ready() {
