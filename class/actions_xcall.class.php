@@ -119,10 +119,10 @@ class Actionsxcall
 								<option>hold</option>
 								<option>unhold</option>
 								<option>leave</option>
-								<option>merge</option>
+								<!-- <option>merge</option> -->
 								<option>redirect</option>
-								<option>sendDtmfs</option>
-								<option>transfer</option>
+								<!-- <option>sendDtmfs</option> -->
+								<!-- <option>transfer</option> -->
 							</select>
 							<span id="xcall_actionValueLabel"></span>
 

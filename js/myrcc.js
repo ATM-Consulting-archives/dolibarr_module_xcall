@@ -416,13 +416,16 @@ var server = {
 		console.log('onmessage', m);
 		var msg = m.data || m.error;
 		try {
-			if (msg != 'ping' && typeof (msg) == typeof ('')/* && !$('#xcall_lineId').val().length*/) {
+			if (msg != 'ping' && typeof (msg) == typeof ('') /*&& !$('#xcall_lineId').val().length*/) {
 				var json = JSON.parse(msg);
 				if (json.item && json.item.length) {
+					console.log(json);
 					for (var i = 0; i < json.item.length; i++) {
 						var lineId = json.item[i].lineId;
-						if (lineId && json.item[i].state != 'dropped') {
+						if (lineId && json.item[i].state != 'dropped' && xcall_id == json.item[i].extension) {
 							$('#xcall_lineId').val(lineId);
+						} else if (lineId && json.item[i].state == 'dropped') {
+							$('#xcall_lineId').val('');
 						}
 					}
 				}
